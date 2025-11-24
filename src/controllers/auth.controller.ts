@@ -54,3 +54,5 @@ export const loginController = async (req: Request, res: Response) => {
     });
   }
 };
+export { registerUser, loginUser };
+
