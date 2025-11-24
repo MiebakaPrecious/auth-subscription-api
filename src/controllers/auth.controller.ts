@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
-import { registerUser, loginUser } from "../services/auth.service";
+import {
+  registerUser as registerUserService,
+  loginUser as loginUserService,
+} from "../services/auth.service";
 
-export const registerController = async (req: Request, res: Response) => {
+export const registerUser = async (req: Request, res: Response) => {
   try {
     const { fullName, email, password } = req.body;
 
@@ -13,7 +16,7 @@ export const registerController = async (req: Request, res: Response) => {
       });
     }
 
-    const user = await registerUser(fullName, email, password);
+    const user = await registerUserService(fullName, email, password);
 
     return res.status(201).json({
       success: true,
@@ -28,7 +31,7 @@ export const registerController = async (req: Request, res: Response) => {
   }
 };
 
-export const loginController = async (req: Request, res: Response) => {
+export const loginUser = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
@@ -40,7 +43,7 @@ export const loginController = async (req: Request, res: Response) => {
       });
     }
 
-    const result = await loginUser(email, password);
+    const result = await loginUserService(email, password);
 
     return res.status(200).json({
       success: true,
@@ -54,5 +57,4 @@ export const loginController = async (req: Request, res: Response) => {
     });
   }
 };
-export { registerUser, loginUser };
 
