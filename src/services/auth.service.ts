@@ -1,67 +1,34 @@
-import UserModel, { IUser } from "../models/user.model";
-import jwt from "jsonwebtoken";
-import { ENV } from "../config/env";
+import jwt, { Secret } from "jsonwebtoken";
 
-interface RegisterInput {
-  name?: string;
-  email: string;
-  password: string;
-}
+export const loginUser = async (email: string, password: string) => {
+  const user = await User.findOne({ email });
+  if (!user) throw new Error("Invalid email or password");
 
-interface LoginInput {
-  email: string;
-  password: string;
-}
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) throw new Error("Invalid email or password");
 
-export interface AuthResponse {
-  user: IUser;
-  token: string;
-}
+  const token = jwt.sign(
+    { id: user._id, email: user.email },
+    process.env.JWT_SECRET as Secret,
+    { expiresIn: "7d" }
+  );
 
-// Generate JWT
-const generateToken = (userId: string): string => {
-  return jwt.sign({ id: userId }, ENV.JWT_SECRET, {
-    expiresIn: ENV.JWT_EXPIRES_IN,
-  });
+  return { token, user };
 };
+import User, { IUser } from "../models/user.model";
 
-// Register
-export const registerUser = async (data: RegisterInput): Promise<AuthResponse> => {
-  const { name, email, password } = data;
-
-  // Check if user already exists
-  const existing = await UserModel.findOne({ email });
-  if (existing) {
-    throw new Error("Email already in use");
+export const registerUser = async (fullName: string, email: string, password: string): Promise<IUser> => {
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new Error("Email is already registered");
   }
 
-  // Create user
-  const user = await UserModel.create({
-    name,
+  const newUser = new User({
+    name: fullName,
     email,
     password,
   });
 
-  const token = generateToken(user._id.toString());
-
-  return { user, token };
-};
-
-// Login
-export const loginUser = async (data: LoginInput): Promise<AuthResponse> => {
-  const { email, password } = data;
-
-  const user = await UserModel.findOne({ email });
-  if (!user) {
-    throw new Error("Invalid email or password");
-  }
-
-  const isMatch = await user.comparePassword(password);
-  if (!isMatch) {
-    throw new Error("Invalid email or password");
-  }
-
-  const token = generateToken(user._id.toString());
-
-  return { user, token };
+  await newUser.save();
+  return newUser;
 };
