@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes";
 import subscriptionRoutes from "./routes/subscription.routes";
-
+import paymentRoutes from "./routes/payment.routes";
 
 
 // Load environment variables
@@ -22,6 +22,9 @@ app.use("/api/auth", authRoutes);
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({ message: "API is running 🚀" });
 });
+
+// 
+app.use("/api/payment", paymentRoutes);
 
 // Subscription routes
 app.use("/api/subscriptions", subscriptionRoutes);
